@@ -1,73 +1,81 @@
-import apiClient from '../lib/apiClient';
-import { Employee, ApiResponse } from '../types';
+import axios from 'axios';
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://vsggmk7vo9.execute-api.us-east-1.amazonaws.com';
+
+console.log('Auth Service - API_URL:', API_URL);
 
 export interface LoginCredentials {
   email: string;
   password: string;
 }
 
-export interface LoginResponse {
-  employee: Employee;
-  access_token: string;
-  requires_mfa: boolean;
-}
-
-export interface MFAVerification {
-  email: string;
-  code: string;
+export interface AuthResponse {
+  success: boolean;
+  token?: string;
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+    first_name: string;
+    last_name: string;
+  };
+  error?: string;
 }
 
 export const authService = {
-  // Login (primer paso)
-  login: async (credentials: LoginCredentials): Promise<LoginResponse> => {
-    const response = await apiClient.post<ApiResponse<LoginResponse>>(
-      '/backoffice/auth/login',
-      credentials
-    );
-    if (!response.data.data) throw new Error('Login failed');
-    return response.data.data;
+  async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    try {
+      console.log('Attempting login with:', credentials.email);
+      console.log('API URL:', `${API_URL}/api/backoffice/auth/login`);
+      
+      const response = await axios.post(
+        `${API_URL}/api/backoffice/auth/login`,
+        credentials,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      console.log('Login response:', response.data);
+      
+      if (response.data.success && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        console.log('Login successful, token saved');
+      }
+      
+      return response.data;
+    } catch (error: any) {
+      console.error('Login error:', error);
+      console.error('Error response:', error.response?.data);
+      
+      return {
+        success: false,
+        error: error.response?.data?.error || 'Error al iniciar sesión. Por favor intenta de nuevo.'
+      };
+    }
   },
-  
-  // Verificar MFA (segundo paso)
-  verifyMFA: async (verification: MFAVerification): Promise<LoginResponse> => {
-    const response = await apiClient.post<ApiResponse<LoginResponse>>(
-      '/backoffice/auth/verify-mfa',
-      verification
-    );
-    if (!response.data.data) throw new Error('MFA verification failed');
-    return response.data.data;
+
+  async logout() {
+    console.log('Logging out');
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   },
-  
-  // Refresh token
-  refreshToken: async (refreshToken: string): Promise<{ access_token: string }> => {
-    const response = await apiClient.post<ApiResponse<{ access_token: string }>>(
-      '/backoffice/auth/refresh',
-      { refresh_token: refreshToken }
-    );
-    if (!response.data.data) throw new Error('Token refresh failed');
-    return response.data.data;
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
   },
-  
-  // Logout
-  logout: async (): Promise<void> => {
-    await apiClient.post('/backoffice/auth/logout');
+
+  getUser() {
+    const userStr = localStorage.getItem('user');
+    return userStr ? JSON.parse(userStr) : null;
   },
-  
-  // Recuperar contraseña
-  forgotPassword: async (email: string): Promise<{ message: string }> => {
-    const response = await apiClient.post<ApiResponse<{ message: string }>>(
-      '/backoffice/auth/forgot-password',
-      { email }
-    );
-    return response.data.data || { message: 'Email sent' };
-  },
-  
-  // Reset password
-  resetPassword: async (token: string, password: string): Promise<{ message: string }> => {
-    const response = await apiClient.post<ApiResponse<{ message: string }>>(
-      '/backoffice/auth/reset-password',
-      { token, password }
-    );
-    return response.data.data || { message: 'Password reset' };
+
+  isAuthenticated(): boolean {
+    const token = this.getToken();
+    console.log('Is authenticated?', !!token);
+    return !!token;
   }
 };
