@@ -16,6 +16,11 @@ export interface User {
 }
 
 export const usersService = {
+  // Alias para compatibilidad
+  async getAll() {
+    return this.getUsers();
+  },
+
   async getUsers() {
     try {
       const response = await axios.get(`${API_URL}/api/backoffice/users`);
@@ -24,6 +29,10 @@ export const usersService = {
       console.error('Error fetching users:', error);
       throw error;
     }
+  },
+
+  async getById(id: string) {
+    return this.getUserById(id);
   },
 
   async getUserById(id: string) {
@@ -36,6 +45,10 @@ export const usersService = {
     }
   },
 
+  async update(id: string, data: Partial<User>) {
+    return this.updateUser(id, data);
+  },
+
   async updateUser(id: string, data: Partial<User>) {
     try {
       const response = await axios.put(`${API_URL}/api/backoffice/users/${id}`, data);
@@ -44,6 +57,10 @@ export const usersService = {
       console.error('Error updating user:', error);
       throw error;
     }
+  },
+
+  async delete(id: string) {
+    return this.deleteUser(id);
   },
 
   async deleteUser(id: string) {
