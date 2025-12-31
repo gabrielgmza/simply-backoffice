@@ -5,6 +5,7 @@ import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import IntegrationsPage from './pages/settings/IntegrationsPage';
 import UsersListPage from './pages/users/UsersListPage';
+import LeadsPage from './pages/leads/LeadsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -32,6 +33,7 @@ function App() {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/leads" element={<LeadsPage />} />
             <Route path="/users" element={<UsersListPage />} />
             <Route path="/users/:id" element={<UserDetailPage />} />
             <Route path="/transactions" element={<TransactionsPage />} />
