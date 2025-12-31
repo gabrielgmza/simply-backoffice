@@ -12,11 +12,9 @@ import { toast } from 'sonner';
 interface UserDetail {
   id: string;
   email: string;
-  telefono?: string;
+  phone?: string;
   kyc_status?: string;
-  kyc_verified_at?: string;
-  kyc_verified_by?: string;
-  status: string;
+  user_status: string;
   created_at: string;
   updated_at: string;
 }
@@ -106,7 +104,7 @@ export default function UserDetailPage() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-gray-900">{user.email}</h1>
-              <p className="text-gray-600">{user.telefono || 'Sin teléfono'}</p>
+              <p className="text-gray-600">{user.phone || 'Sin teléfono'}</p>
             </div>
           </div>
         </div>
@@ -196,14 +194,14 @@ export default function UserDetailPage() {
                     <Phone className="w-4 h-4" />
                     Teléfono
                   </p>
-                  <p className="font-medium text-gray-900">{user.telefono || 'No proporcionado'}</p>
+                  <p className="font-medium text-gray-900">{user.phone || 'No proporcionado'}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-gray-500">Estado</p>
-                  <Select value={user.status} onValueChange={handleStatusChange} disabled={updating}>
+                  <Select value={user.user_status} onValueChange={handleStatusChange} disabled={updating}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
