@@ -1,40 +1,49 @@
 import { useEffect, useState } from 'react';
+import { dashboardService, DashboardStats, GrowthData, Activity, TopPerformer } from '@/services/dashboardService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, CreditCard, AlertCircle, TrendingUp, DollarSign, Activity } from 'lucide-react';
-import { DashboardStats } from '@/types';
-
-// Mock data - reemplazar con API real
-const mockStats: DashboardStats = {
-  total_users: 1247,
-  active_users: 892,
-  pending_kyc: 23,
-  total_transactions_today: 156,
-  total_volume_today: 2847920,
-  open_tickets: 12,
-  active_retentions: 3,
-  total_retained_amount: 125000,
-  aum: 145800000,
-  revenue_mtd: 423000
-};
+import { Users, UserPlus, Ticket, TrendingUp, ArrowUp, ArrowDown, Activity as ActivityIcon } from 'lucide-react';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { toast } from 'sonner';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [growth, setGrowth] = useState<GrowthData[]>([]);
+  const [activity, setActivity] = useState<Activity[]>([]);
+  const [performers, setPerformers] = useState<TopPerformer[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simular carga de datos
-    setTimeout(() => {
-      setStats(mockStats);
-      setLoading(false);
-    }, 500);
+    loadDashboard();
   }, []);
+
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
+      const [statsData, growthData, activityData, performersData] = await Promise.all([
+        dashboardService.getStats(),
+        dashboardService.getGrowth(30),
+        dashboardService.getActivity(8),
+        dashboardService.getTopPerformers()
+      ]);
+      
+      setStats(statsData);
+      setGrowth(growthData);
+      setActivity(activityData);
+      setPerformers(performersData);
+    } catch (error) {
+      console.error('Error loading dashboard:', error);
+      toast.error('Error al cargar el dashboard');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Cargando dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Cargando dashboard...</p>
         </div>
       </div>
     );
@@ -42,203 +51,233 @@ export default function DashboardPage() {
 
   if (!stats) return null;
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('es-AR', {
-      style: 'currency',
-      currency: 'ARS',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(value);
-  };
-
-  const formatNumber = (value: number) => {
-    return new Intl.NumberFormat('es-AR').format(value);
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
-          Vista general del sistema Simply
-        </p>
+        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+        <p className="text-gray-600 mt-1">Resumen general de Simply</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Total Users */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Users Card */}
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Usuarios</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Usuarios Totales
+            </CardTitle>
+            <Users className="w-5 h-5 text-indigo-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(stats.total_users)}</div>
-            <p className="text-xs text-muted-foreground">
-              {formatNumber(stats.active_users)} activos
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* AUM */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">AUM</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.aum)}</div>
-            <p className="text-xs text-muted-foreground">
-              Assets Under Management
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Revenue MTD */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Revenue MTD</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.revenue_mtd)}</div>
-            <p className="text-xs text-muted-foreground">
-              Ingresos del mes
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Transactions Today */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Transacciones Hoy</CardTitle>
-            <Activity className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatNumber(stats.total_transactions_today)}</div>
-            <p className="text-xs text-muted-foreground">
-              {formatCurrency(stats.total_volume_today)} en volumen
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Alerts and Warnings */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {/* Pending KYC */}
-        {stats.pending_kyc > 0 && (
-          <Card className="border-yellow-200 bg-yellow-50">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-yellow-600" />
-                Verificaciones KYC Pendientes
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-yellow-900">
-                {stats.pending_kyc}
-              </div>
-              <p className="text-xs text-yellow-700 mt-1">
-                Requieren revisión de compliance
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Open Tickets */}
-        {stats.open_tickets > 0 && (
-          <Card className="border-blue-200 bg-blue-50">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-blue-600" />
-                Tickets Abiertos
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-900">
-                {stats.open_tickets}
-              </div>
-              <p className="text-xs text-blue-700 mt-1">
-                Requieren atención de soporte
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Active Retentions */}
-        {stats.active_retentions > 0 && (
-          <Card className="border-red-200 bg-red-50">
-            <CardHeader>
-              <CardTitle className="text-sm font-medium flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-red-600" />
-                Retenciones Activas
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-900">
-                {stats.active_retentions}
-              </div>
-              <p className="text-xs text-red-700 mt-1">
-                {formatCurrency(stats.total_retained_amount)} retenidos
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Charts Placeholder */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Transacciones por Día</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center bg-muted/30 rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                📊 Gráfico de Recharts - TODO
-              </p>
+            <div className="text-3xl font-bold text-gray-900">{stats.users.total}</div>
+            <div className="flex items-center gap-1 mt-2">
+              <span className="text-sm text-gray-600">+{stats.users.newToday} hoy</span>
+              {stats.users.growth > 0 && (
+                <div className="flex items-center text-green-600 text-sm">
+                  <ArrowUp className="w-4 h-4" />
+                  {stats.users.growth}%
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
 
+        {/* Leads Card */}
         <Card>
-          <CardHeader>
-            <CardTitle>Crecimiento de Usuarios</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Leads
+            </CardTitle>
+            <UserPlus className="w-5 h-5 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex items-center justify-center bg-muted/30 rounded-lg">
-              <p className="text-sm text-muted-foreground">
-                📈 Gráfico de Recharts - TODO
-              </p>
+            <div className="text-3xl font-bold text-gray-900">{stats.leads.total}</div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-sm text-gray-600">+{stats.leads.newToday} hoy</span>
+              <span className="text-sm text-indigo-600 font-medium">
+                {stats.leads.conversionRate}% conversión
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tickets Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Tickets
+            </CardTitle>
+            <Ticket className="w-5 h-5 text-orange-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">{stats.tickets.total}</div>
+            <div className="flex items-center gap-2 mt-2">
+              <span className="text-sm text-orange-600">{stats.tickets.open} abiertos</span>
+              <span className="text-sm text-green-600">
+                {stats.tickets.resolutionRate}% resueltos
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Employees Card */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Equipo
+            </CardTitle>
+            <Users className="w-5 h-5 text-purple-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-900">{stats.employees.total}</div>
+            <div className="mt-2">
+              <span className="text-sm text-green-600">{stats.employees.active} activos</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Growth Chart */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-indigo-600" />
+              Crecimiento (Últimos 30 días)
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {growth.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={growth}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="#888"
+                    fontSize={12}
+                    tickFormatter={(value) => new Date(value).getDate().toString()}
+                  />
+                  <YAxis stroke="#888" fontSize={12} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: '#fff', 
+                      border: '1px solid #e5e7eb',
+                      borderRadius: '6px'
+                    }}
+                  />
+                  <Legend />
+                  <Line 
+                    type="monotone" 
+                    dataKey="users" 
+                    stroke="#6366f1" 
+                    strokeWidth={2}
+                    name="Usuarios"
+                    dot={{ fill: '#6366f1' }}
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="leads" 
+                    stroke="#3b82f6" 
+                    strokeWidth={2}
+                    name="Leads"
+                    dot={{ fill: '#3b82f6' }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-500">
+                No hay datos disponibles
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Top Performers */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5 text-purple-600" />
+              Top Performers
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {performers.length > 0 ? (
+                performers.map((performer, index) => (
+                  <div 
+                    key={performer.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{performer.name}</p>
+                        <p className="text-sm text-gray-500">
+                          {performer.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-indigo-600">{performer.total}</p>
+                      <p className="text-xs text-gray-500">tickets</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="h-[250px] flex items-center justify-center text-gray-500">
+                  No hay datos disponibles
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Activity Feed */}
       <Card>
         <CardHeader>
-          <CardTitle>Accesos Rápidos</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <ActivityIcon className="w-5 h-5 text-green-600" />
+            Actividad Reciente
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-2 md:grid-cols-3">
-            <button className="p-4 border rounded-lg hover:bg-accent transition-colors text-left">
-              <Users className="w-5 h-5 mb-2 text-primary" />
-              <div className="font-medium">Usuarios</div>
-              <div className="text-xs text-muted-foreground">Gestionar usuarios</div>
-            </button>
-            
-            <button className="p-4 border rounded-lg hover:bg-accent transition-colors text-left">
-              <CreditCard className="w-5 h-5 mb-2 text-primary" />
-              <div className="font-medium">Transacciones</div>
-              <div className="text-xs text-muted-foreground">Ver transacciones</div>
-            </button>
-            
-            <button className="p-4 border rounded-lg hover:bg-accent transition-colors text-left">
-              <AlertCircle className="w-5 h-5 mb-2 text-primary" />
-              <div className="font-medium">Compliance</div>
-              <div className="text-xs text-muted-foreground">KYC y ROS</div>
-            </button>
+          <div className="space-y-3">
+            {activity.length > 0 ? (
+              activity.map((item, index) => (
+                <div 
+                  key={index}
+                  className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <div className={`
+                    w-2 h-2 rounded-full mt-2
+                    ${item.type === 'user' ? 'bg-indigo-500' : ''}
+                    ${item.type === 'lead' ? 'bg-blue-500' : ''}
+                    ${item.type === 'ticket' ? 'bg-orange-500' : ''}
+                  `} />
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-900">{item.description}</p>
+                    {item.creator && (
+                      <p className="text-xs text-gray-500">Por {item.creator}</p>
+                    )}
+                  </div>
+                  <span className="text-xs text-gray-500 whitespace-nowrap">
+                    {new Date(item.timestamp).toLocaleTimeString('es-AR', { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="py-8 text-center text-gray-500">
+                No hay actividad reciente
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

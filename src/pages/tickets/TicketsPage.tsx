@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ticketService, Ticket } from '@/services/ticketService';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -7,6 +8,7 @@ import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function TicketsPage() {
+  const navigate = useNavigate();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,6 +60,19 @@ export default function TicketsPage() {
       render: (t) => t.assigned_to 
         ? `${t.assigned_to.first_name} ${t.assigned_to.last_name}`
         : 'Sin asignar'
+    },
+    {
+      key: 'actions',
+      label: 'Acciones',
+      render: (t) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate(`/tickets/${t.id}`)}
+        >
+          Ver Detalle
+        </Button>
+      )
     }
   ];
 

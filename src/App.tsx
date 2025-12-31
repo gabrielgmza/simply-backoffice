@@ -1,14 +1,18 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import LoginPage from './pages/auth/LoginPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import IntegrationsPage from './pages/settings/IntegrationsPage';
 import UsersListPage from './pages/users/UsersListPage';
+import UserDetailPage from './pages/users/UserDetailPage';
 import LeadsPage from './pages/leads/LeadsPage';
 import EmployeesListPage from './pages/employees/EmployeesListPage';
 import CreateEmployeePage from './pages/employees/CreateEmployeePage';
+import EmployeeDetailPage from './pages/employees/EmployeeDetailPage';
 import TicketsPage from './pages/tickets/TicketsPage';
+import TicketDetailPage from './pages/tickets/TicketDetailPage';
 import AriaPage from './pages/aria/AriaPage';
 
 const queryClient = new QueryClient({
@@ -21,8 +25,6 @@ const queryClient = new QueryClient({
 });
 
 // Placeholder pages
-const UserDetailPage = () => <div className="p-6"><h1 className="text-2xl font-bold">User Detail - Coming Soon</h1></div>;
-const EmployeeDetailPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Employee Detail - Coming Soon</h1></div>;
 const TransactionsPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Transacciones - Coming Soon</h1></div>;
 const CompliancePage = () => <div className="p-6"><h1 className="text-2xl font-bold">Compliance - Coming Soon</h1></div>;
 const SupportPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Soporte - Coming Soon</h1></div>;
@@ -31,8 +33,9 @@ const SettingsPage = () => <div className="p-6"><h1 className="text-2xl font-bol
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
 
@@ -48,6 +51,7 @@ function App() {
             <Route path="/employees/:id" element={<EmployeeDetailPage />} />
             
             <Route path="/tickets" element={<TicketsPage />} />
+            <Route path="/tickets/:id" element={<TicketDetailPage />} />
             
             <Route path="/aria" element={<AriaPage />} />
             
@@ -64,6 +68,7 @@ function App() {
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

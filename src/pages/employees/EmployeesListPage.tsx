@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { employeeService, Employee } from '@/services/employeeService';
+import { useDebounce } from '@/hooks/useDebounce';
 import { DataTable, Column } from '@/components/ui/DataTable';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus, Search, Users } from 'lucide-react';
+import { Plus, Search, Users, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function EmployeesListPage() {
@@ -18,6 +19,8 @@ export default function EmployeesListPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [sortKey, setSortKey] = useState<string>('created_at');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
+  
+  const debouncedSearch = useDebounce(search, 500);
 
   const loadEmployees = async () => {
     try {
@@ -25,7 +28,7 @@ export default function EmployeesListPage() {
       const data = await employeeService.getAll({
         page,
         limit: 20,
-        search: search || undefined
+        search: debouncedSearch || undefined
       });
       
       setEmployees(data.employees);
@@ -41,12 +44,18 @@ export default function EmployeesListPage() {
 
   useEffect(() => {
     loadEmployees();
-  }, [page, search]);
+  }, [page, debouncedSearch]);
 
   const handleSort = (key: string, direction: 'asc' | 'desc') => {
     setSortKey(key);
     setSortDirection(direction);
     // En una implementación real, recargaríamos con el sorting del backend
+  };
+
+  const handleExport = () => {
+    const baseUrl = import.meta.env.VITE_API_URL || 'https://sbgndespfp.us-east-1.awsapprunner.com';
+    const token = localStorage.getItem('accessToken');
+    window.open(`${baseUrl}/api/backoffice/export/employees?token=${token}`, '_blank');
   };
 
   const columns: Column<Employee>[] = [
@@ -131,10 +140,16 @@ export default function EmployeesListPage() {
             Gestiona el equipo del backoffice
           </p>
         </div>
-        <Button onClick={() => navigate('/employees/new')}>
-          <Plus className="w-4 h-4 mr-2" />
-          Nuevo Empleado
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleExport}>
+            <Download className="w-4 h-4 mr-2" />
+            Exportar CSV
+          </Button>
+          <Button onClick={() => navigate('/employees/new')}>
+            <Plus className="w-4 h-4 mr-2" />
+            Nuevo Empleado
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}

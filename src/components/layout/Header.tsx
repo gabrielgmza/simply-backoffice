@@ -1,6 +1,7 @@
 import { Bell, LogOut, Settings, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { NotificationPanel } from '@/components/NotificationPanel';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,10 +39,7 @@ export function Header() {
       <div className="h-full px-6 flex items-center justify-between">
         <div className="flex-1"></div>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full"></span>
-          </Button>
+          <NotificationPanel />
 
           <div className="flex items-center gap-3 pl-4 border-l">
             <DropdownMenu>
