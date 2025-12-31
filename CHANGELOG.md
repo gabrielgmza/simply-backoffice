@@ -1,84 +1,63 @@
 # Changelog - Simply Backoffice
 
-## [2.2.0-PARTE1] - 2024-12-31
+## [2.2.0] - 2024-12-31
 
-### ✨ Added - AUTH ACTUALIZADO + UI COMPONENTS
+### ✨ Added - COMPLETE BACKOFFICE v2.2.0
 
 **Autenticación JWT:**
-- ✅ authService actualizado para JWT (accessToken + refreshToken)
-- ✅ Login con tokens reales
-- ✅ Logout con llamada al backend
-- ✅ getCurrentUser() para obtener datos actualizados del empleado
+- authService con JWT (accessToken + refreshToken)
+- Login/Logout funcional
+- getCurrentUser()
 
 **Session Management:**
-- ✅ useSessionTimeout hook (30 min de inactividad)
-- ✅ Auto-logout con warning 5 min antes
-- ✅ Throttle de eventos para optimización
-- ✅ Integrado en ProtectedRoute
+- useSessionTimeout hook (30 min)
+- Auto-logout con warning
+- Integrado en ProtectedRoute
 
-**Header Mejorado:**
-- ✅ Dropdown con perfil
-- ✅ Botón de logout funcional
-- ✅ Avatar con iniciales
-- ✅ Rol del empleado visible
+**Componentes UI:**
+- DataTable - Tabla reutilizable con sorting, loading, empty states
+- StatusBadge - Badges auto-coloreados por status
+- RoleSelector - Selector de roles (grid + dropdown)
 
-**Componentes UI Reutilizables:**
-- ✅ `DataTable` - Tabla con sorting, paginación, loading states
-- ✅ `StatusBadge` - Badges con colores automáticos por status
-- ✅ `RoleSelector` - Selector de roles con íconos y descripciones
-- ✅ `RoleSelectDropdown` - Versión dropdown compacta
+**Páginas - Empleados:**
+- EmployeesListPage - Lista con DataTable, filtros, stats
+- CreateEmployeePage - Formulario con RoleSelector
+- employeeService.ts
+
+**Páginas - Tickets:**
+- TicketsPage - Lista de tickets con filtros
+- ticketService.ts
+
+**Páginas - Aria AI:**
+- AriaPage - Chat interface con Claude
+- ariaService.ts
+- Conversaciones persistentes
+- Auto-scroll, loading states
+
+**Header:**
+- Dropdown con perfil
+- Logout funcional
+- Avatar con iniciales
+
+**Sidebar:**
+- Links: Empleados, Tickets, Aria AI
+- Iconos actualizados
 
 **Servicios:**
-- ✅ authService.ts - JWT completo
-- ✅ apiClient.ts - Ya tenía interceptor (sin cambios)
+- src/services/employeeService.ts
+- src/services/ticketService.ts
+- src/services/ariaService.ts
 
 **Hooks:**
-- ✅ useSessionTimeout.ts - Auto-logout por inactividad
-
-### 🔧 Changed
-- Migración de auth hardcoded a JWT real
-- localStorage: `accessToken`, `refreshToken`, `user`
-- LoginPage actualizado para nuevo formato de respuesta
-- Header con logout funcional
-
-### 📦 Components Nuevos
-
-```
-src/
-├── hooks/
-│   └── useSessionTimeout.ts      ✅ NUEVO
-├── components/
-│   └── ui/
-│       ├── DataTable.tsx          ✅ NUEVO
-│       ├── StatusBadge.tsx        ✅ NUEVO
-│       └── RoleSelector.tsx       ✅ NUEVO
-└── services/
-    └── authService.ts             ✅ ACTUALIZADO
-```
-
-### ⏳ Pendiente (Entrega 2)
-
-**Páginas:**
-- ☐ src/pages/employees/EmployeesListPage.tsx
-- ☐ src/pages/employees/EmployeeDetailPage.tsx
-- ☐ src/pages/employees/CreateEmployeePage.tsx
-- ☐ src/pages/tickets/TicketsPage.tsx
-- ☐ src/pages/aria/AriaPage.tsx
-- ☐ src/pages/settings/ProfilePage.tsx
-
-**Servicios:**
-- ☐ src/services/employeeService.ts
-- ☐ src/services/ticketService.ts
-- ☐ src/services/ariaService.ts
+- src/hooks/useSessionTimeout.ts
 
 ---
 
 ## [2.1.1] - 2024-12-31
 
 ### Added
-- Leads page con tabla, filtros, exportación
+- Leads page
 - leadsService.ts
-- Sidebar actualizado con link a Leads
 
 ---
 
@@ -87,8 +66,5 @@ src/
 ### Initial Release
 - Login page
 - Dashboard básico
-- Users list page
+- Users list
 - Integrations page
-- shadcn/ui components
-- Zustand store
-- React Query

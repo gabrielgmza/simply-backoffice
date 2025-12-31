@@ -6,6 +6,10 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import IntegrationsPage from './pages/settings/IntegrationsPage';
 import UsersListPage from './pages/users/UsersListPage';
 import LeadsPage from './pages/leads/LeadsPage';
+import EmployeesListPage from './pages/employees/EmployeesListPage';
+import CreateEmployeePage from './pages/employees/CreateEmployeePage';
+import TicketsPage from './pages/tickets/TicketsPage';
+import AriaPage from './pages/aria/AriaPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,6 +22,7 @@ const queryClient = new QueryClient({
 
 // Placeholder pages
 const UserDetailPage = () => <div className="p-6"><h1 className="text-2xl font-bold">User Detail - Coming Soon</h1></div>;
+const EmployeeDetailPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Employee Detail - Coming Soon</h1></div>;
 const TransactionsPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Transacciones - Coming Soon</h1></div>;
 const CompliancePage = () => <div className="p-6"><h1 className="text-2xl font-bold">Compliance - Coming Soon</h1></div>;
 const SupportPage = () => <div className="p-6"><h1 className="text-2xl font-bold">Soporte - Coming Soon</h1></div>;
@@ -34,8 +39,18 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/leads" element={<LeadsPage />} />
+            
             <Route path="/users" element={<UsersListPage />} />
             <Route path="/users/:id" element={<UserDetailPage />} />
+            
+            <Route path="/employees" element={<EmployeesListPage />} />
+            <Route path="/employees/new" element={<CreateEmployeePage />} />
+            <Route path="/employees/:id" element={<EmployeeDetailPage />} />
+            
+            <Route path="/tickets" element={<TicketsPage />} />
+            
+            <Route path="/aria" element={<AriaPage />} />
+            
             <Route path="/transactions" element={<TransactionsPage />} />
             <Route path="/compliance" element={<CompliancePage />} />
             <Route path="/support" element={<SupportPage />} />

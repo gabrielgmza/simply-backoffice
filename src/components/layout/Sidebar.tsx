@@ -9,7 +9,10 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  UserPlus
+  UserPlus,
+  UserCog,
+  Ticket,
+  Sparkles
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/authStore';
@@ -40,6 +43,21 @@ const navItems: NavItem[] = [
     href: '/users',
     icon: Users,
     permission: Permission.VIEW_USERS,
+  },
+  {
+    title: 'Empleados',
+    href: '/employees',
+    icon: UserCog,
+  },
+  {
+    title: 'Tickets',
+    href: '/tickets',
+    icon: Ticket,
+  },
+  {
+    title: 'Aria AI',
+    href: '/aria',
+    icon: Sparkles,
   },
   {
     title: 'Transacciones',
