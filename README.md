@@ -1,116 +1,193 @@
-# Simply Backoffice
+# Simply Backoffice v2.2.0 PARTE 1
 
-Sistema administrativo para Simply - Plataforma fintech de inversiones y financiamiento.
+Frontend del backoffice para Simply fintech platform con autenticación JWT, session timeout y componentes UI reutilizables.
 
 ## 🚀 Stack Tecnológico
 
-* **Frontend:** React 19 + TypeScript 5
-* **Build Tool:** Vite 7
-* **State Management:** Zustand + TanStack Query
-* **UI:** Shadcn/ui + Radix UI + Tailwind CSS
-* **Icons:** Lucide React
+* React 18
+* TypeScript 5
+* Vite 7
+* TailwindCSS
+* shadcn/ui + Radix UI
+* Zustand (state management)
+* TanStack Query
+* React Router DOM
 
-## ✅ Estado Actual
+## ✨ Features v2.2.0 PARTE 1
 
-### Implementado (Fase 1)
-- Login page funcional
-- Dashboard con placeholders
-- Gestión de usuarios (lista)
-- Página de integraciones
-- Auth store con Zustand
-- API client con Axios + interceptors
+### Autenticación JWT
+- Login con accessToken + refreshToken
+- Auto-refresh de tokens
+- Logout con llamada al backend
+- getCurrentUser() actualizado
 
-### Pendiente
-Ver `TODO.md` para lista completa de tareas.
+### Session Timeout
+- Auto-logout después de 30 min de inactividad
+- Warning 5 minutos antes
+- Eventos detectados: mousedown, mousemove, keydown, scroll, touchstart, click
+- Throttle para optimización
 
-## 📦 Instalación
+### Header con Logout
+- Dropdown con perfil de usuario
+- Nombre, rol y avatar
+- Opciones: Mi Perfil, Configuración, Cerrar Sesión
+- Botón de notificaciones
 
-```bash
-npm install
+### Componentes UI Reutilizables
+
+**DataTable**
+```tsx
+<DataTable
+  data={employees}
+  columns={columns}
+  onSort={handleSort}
+  sortKey="created_at"
+  sortDirection="desc"
+  isLoading={loading}
+  emptyMessage="No hay empleados"
+/>
 ```
 
-## 🔧 Variables de Entorno
-
-Crear `.env`:
-
-```env
-VITE_API_URL=https://sbgndespfp.us-east-1.awsapprunner.com
-VITE_ENV=development
+**StatusBadge**
+```tsx
+<StatusBadge status="ACTIVE" />
+<StatusBadge status="PENDING" variant="warning" />
 ```
 
-## 🏃‍♂️ Desarrollo
+**RoleSelector**
+```tsx
+<RoleSelector 
+  value={role}
+  onChange={setRole}
+  allowedRoles={['ADMIN', 'ANALYST']}
+/>
 
-```bash
-npm run dev
+// Versión dropdown compacta
+<RoleSelectDropdown 
+  value={role}
+  onChange={setRole}
+/>
 ```
-
-Abrir: http://localhost:5173
-
-## 🏗️ Build
-
-```bash
-npm run build
-```
-
-Output: `dist/`
-
-## 🔐 Credenciales de Testing
-
-```
-Email: admin@simply.com
-Password: Admin123!
-```
-
-## 🚀 Deploy
-
-Ver `DEPLOY_GUIDE.md` para guía completa de deploy en AWS Amplify.
-
-### Quick Deploy
-
-```bash
-# Push a GitHub
-git push origin main
-
-# Amplify auto-deploy desde GitHub
-```
-
-## 📋 Endpoints Backend
-
-- Auth: `POST /api/backoffice/auth/login`
-- Users: `GET /api/backoffice/users`
-- Dashboard: `GET /api/backoffice/dashboard/stats`
-- Integrations: `GET /api/backoffice/integrations`
-
-## 🎨 UI Components
-
-Shadcn/ui components ya instalados en `src/components/ui/`
 
 ## 📁 Estructura
 
 ```
 src/
-├── components/    # UI components
-├── pages/         # Páginas
-├── services/      # API services
-├── store/         # Zustand stores
-├── hooks/         # Custom hooks
-├── lib/           # Utils
-└── types/         # TypeScript types
+├── hooks/
+│   └── useSessionTimeout.ts      # Auto-logout
+├── components/
+│   ├── layout/
+│   │   ├── Header.tsx            # Con logout
+│   │   ├── Sidebar.tsx
+│   │   └── MainLayout.tsx
+│   └── ui/
+│       ├── DataTable.tsx         # Tabla reutilizable
+│       ├── StatusBadge.tsx       # Badges
+│       └── RoleSelector.tsx      # Selector de roles
+├── services/
+│   ├── authService.ts            # JWT actualizado
+│   ├── leadsService.ts
+│   └── usersService.ts
+├── store/
+│   └── authStore.ts              # Zustand
+└── pages/
+    ├── auth/
+    │   └── LoginPage.tsx
+    ├── dashboard/
+    ├── users/
+    ├── leads/
+    └── settings/
 ```
 
-## 🔗 Links
+## 🛠️ Setup
 
-- **Backend API:** https://sbgndespfp.us-east-1.awsapprunner.com
-- **Landing:** https://paysur.com
-- **Docs:** Ver `DEPLOY_GUIDE.md`
+### 1. Instalar dependencias
+```bash
+npm install
+```
 
-## 📝 Documentación
+### 2. Configurar variables de entorno
+```bash
+# .env.production
+VITE_API_URL=https://sbgndespfp.us-east-1.awsapprunner.com
+```
 
-- `DEPLOY_GUIDE.md` - Guía completa de deploy
-- `TODO.md` - Tareas pendientes
-- `README.md` - Este archivo
+### 3. Desarrollo
+```bash
+npm run dev
+```
 
----
+### 4. Build para producción
+```bash
+npm run build
+```
 
-**Última actualización:** 31 Diciembre 2024  
-**Versión:** 1.0.0
+### 5. Deploy a Amplify
+```bash
+# Subir a GitHub y Amplify auto-deploya
+git add .
+git commit -m "v2.2.0 PARTE 1"
+git push origin main
+```
+
+## 🔐 Autenticación
+
+### Login
+```typescript
+const response = await authService.login({ email, password });
+if (response.success) {
+  const { accessToken, refreshToken, user } = response.data;
+  // Tokens guardados automáticamente en localStorage
+}
+```
+
+### Logout
+```typescript
+await authService.logout();
+// Limpia tokens y redirige a /login
+```
+
+### Get Current User
+```typescript
+const user = await authService.getCurrentUser();
+```
+
+## 🎨 Componentes UI
+
+### DataTable
+- Sorting (asc/desc)
+- Loading states con skeleton
+- Empty states
+- Customizable columns
+- Render props para contenido personalizado
+
+### StatusBadge
+- Auto-detect variant por status
+- Colores predefinidos para: ACTIVE, PENDING, RESOLVED, etc
+- Custom colors support
+- Traducciones automáticas
+
+### RoleSelector
+- 5 roles: SUPER_ADMIN, ADMIN, COMPLIANCE, CUSTOMER_SERVICE, ANALYST
+- Íconos y descripciones
+- Versión grid (2 columnas)
+- Versión dropdown (compacta)
+- Disabled state support
+
+## 📝 Próximas Features (Entrega 2)
+
+- Página de empleados (lista, crear, editar)
+- Sistema de tickets
+- Aria (AI Assistant)
+- Perfil de empleado
+- Dashboard avanzado
+
+## 🔗 URLs
+
+**Production:** https://main.d1hzpphech8pl4.amplifyapp.com  
+**API:** https://sbgndespfp.us-east-1.awsapprunner.com
+
+## 📞 Contacto
+
+**Developer:** Gabriel  
+**Version:** 2.2.0-PARTE1

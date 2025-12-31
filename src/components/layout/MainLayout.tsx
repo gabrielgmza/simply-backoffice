@@ -1,11 +1,15 @@
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { useSessionTimeout } from '@/hooks/useSessionTimeout';
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 export function MainLayout({ children }: MainLayoutProps) {
+  // Auto-logout por inactividad (30 minutos)
+  useSessionTimeout();
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />

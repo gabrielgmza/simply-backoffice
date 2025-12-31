@@ -1,17 +1,32 @@
-import { Bell, LogOut } from 'lucide-react';
+import { Bell, LogOut, Settings, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/store/authStore';
 import { useNavigate } from 'react-router-dom';
+import { authService } from '@/services/authService';
 
 export function Header() {
   const employee = useAuthStore(state => state.employee);
   const logout = useAuthStore(state => state.logout);
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      logout();
+      navigate('/login');
+    }
   };
 
   if (!employee) return null;
@@ -29,24 +44,42 @@ export function Header() {
           </Button>
 
           <div className="flex items-center gap-3 pl-4 border-l">
-            <div className="text-right">
-              <p className="text-sm font-medium">
-                {employee.first_name} {employee.last_name}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {employee.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
-              </p>
-            </div>
-            
-            <Avatar className="w-10 h-10">
-              <AvatarFallback className="bg-primary text-primary-foreground">
-                {initials}
-              </AvatarFallback>
-            </Avatar>
-
-            <Button variant="ghost" size="icon" onClick={handleLogout} title="Cerrar sesión">
-              <LogOut className="w-5 h-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-2">
+                  <div className="text-right">
+                    <p className="text-sm font-medium">
+                      {employee.first_name} {employee.last_name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {employee.role.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </p>
+                  </div>
+                  
+                  <Avatar className="w-10 h-10">
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {initials}
+                    </AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={() => navigate('/settings/profile')}>
+                  <User className="w-4 h-4 mr-2" />
+                  Mi Perfil
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/settings')}>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Configuración
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Cerrar Sesión
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
