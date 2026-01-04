@@ -223,7 +223,6 @@ export default function Employees() {
       toast.error(error.response?.data?.error || 'No tienes permisos para cambiar este rol');
     }
   };
-  };
 
   const openEditDialog = () => {
     if (!selectedEmployee) return;
